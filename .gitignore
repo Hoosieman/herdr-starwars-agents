@@ -1,0 +1,3 @@
+# Sprite-building scripts and source sheets: not needed to run the mod
+tools/
+__pycache__/
