@@ -15,6 +15,7 @@ const KEY = "starwars-agents"; // shared state: { panes: { <pane id>: <cast key>
 const DIR = `mods/${MOD}/sprites`;
 const SLOT = 128; // width of one character's column
 const LABEL_H = 18;
+const DIM = 0.35; // opacity of sprites that are neither the active session nor hovered
 const FEET = 24; // ground line, px above the strip's bottom
 const SPEED = { working: 62, idle: 28 }; // px per second
 const SLEEP_AFTER = 3 * 60 * 1000;
@@ -607,7 +608,12 @@ export default class StarWarsAgents extends View {
       const { hoverActing, anim, path, w, h, left, top } = this.spriteOf(a.address, c, m, mood, scale);
       const headY = ground - (anim === "sleep" ? 24 : c.tall) * scale;
       const shadowW = 34 * scale;
-      const body = div()
+      // Only the active session and the hovered one are in full colour; the rest fade back
+      // (the sprite and its shadow only, so a blocked ! or done ✓ above them stays loud).
+      const lit = hovered || a.focused || this.drag?.address === a.address;
+      const body = div().id(`sw-body-${a.address}`)
+        .opacity(lit ? 1 : DIM)
+        .transition("opacity", { duration: 180, easing: "ease-out" })
         .child(div().absolute().left(SLOT / 2 - shadowW / 2).top(ground - 1).w(shadowW).h(5 * scale).rounded_full().bg("#00000026"))
         .child(image(path).absolute().left(left).top(top).w(w * scale).h(h * scale));
 
