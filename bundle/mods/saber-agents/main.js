@@ -462,6 +462,29 @@ export default class Agents extends View {
           cx.notify();
         })
         .child(svg(`mods/workspace-chrome/${isPinned ? "pin-off" : "pin"}.svg`).size(13));
+      // Close: a very small x in the row's top-right corner while hovered. Closes the agent's pane through herdr,
+      // so herdr's own confirm for a running program still applies.
+      const close = div()
+        .id(`close-${a.address}`)
+        .absolute()
+        .top(3)
+        .right(4)
+        .size(14)
+        .flex()
+        .items_center()
+        .justify_center()
+        .rounded(3)
+        .text_color(t.dim)
+        .cursor_pointer()
+        .hover((s) => s.bg(t.hover).text_color(t.foreground))
+        .tooltip("Close agent")
+        .on_click((_e, cx) => {
+          cx.stop_propagation();
+          run("pane.close", { pane: a.pane });
+          this.hovered = null;
+          cx.notify();
+        })
+        .child(svg("mods/workspace-chrome/x.svg").size(9));
       // Under a space header the space goes without saying; an automatic tab number says nothing.
       // Without a space header above (priority, pinned) the row names its space.
       const full = byPriority || isPinned;
@@ -530,8 +553,10 @@ export default class Agents extends View {
         .when(subs.length > 0, el => el.child(fold(a, subs)))
         // One fixed slot for the time (or the pin button while hovered), so the saber and its percentage line up
         // on every row whatever the time reads ("1m", "48m") and don't move on hover.
+        .when(this.hovered === a.address, el => el.child(close))
         .child(h_flex().w(30).flex_none().justify_end().items_center()
-          .when(this.hovered === a.address, el => el.child(pin))
+          // While hovered the pin drops a little, clear of the close x above it.
+          .when(this.hovered === a.address, el => el.pt(meterRow ? 16 : 0).child(pin))
           .when(this.hovered !== a.address && Boolean(when), el => el.child(div().flex_none().whitespace_nowrap().text_size(11).text_color(waitColor).when(a.status === "blocked", d => d.font_bold()).child(duration(now - when)))));
     };
 
