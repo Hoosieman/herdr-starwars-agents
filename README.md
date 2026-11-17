@@ -10,7 +10,7 @@ the Star Wars sprites belong to Lucasfilm, so don't make this repo public or add
 | Sprites panel (this mod) | repo root | `mods/starwars-agents` (the clone itself) |
 | Agents list with saber context bars | `bundle/mods/saber-agents` | `mods/saber-agents` |
 | Spaces list | `bundle/mods/saber-spaces` | `mods/saber-spaces` |
-| Title strip (Files toggle; window buttons on Windows) | `bundle/mods/window-controls` | `mods/window-controls` |
+| Title strip (Claude usage saberstaff; Files toggle; window buttons on Windows) | `bundle/mods/window-controls` | `mods/window-controls` |
 | Layout | `bundle/layouts/starwars.json` | `layouts/starwars.json` |
 | Theme | `bundle/themes/saber-night.json` | `themes/saber-night.json` |
 
@@ -34,6 +34,10 @@ Then add the sprite picker key to `~/.config/herdr-app/keys.json` (Option-Shift-
 `"alt-shift-s": "starwars-agents.pick"`
 
 `saber-agents` reads context and cache times through `python3` (built into macOS).
+
+`window-controls` reads the Claude usage limits for its saberstaff from `~/.claude/state/rate-limits.json`, written by a Claude Code status line
+command that draws nothing (`~/.claude/scripts/statusline-rate-limits.js`, set as `statusLine` in
+`~/.claude/settings.json`). Without it both blades stay unlit.
 
 ## Update
 
