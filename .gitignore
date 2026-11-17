@@ -1,3 +1,6 @@
 # Sprite-building scripts and source sheets: not needed to run the mod
 tools/
 __pycache__/
+
+# herdr regenerates these typings in every mod folder
+bundle/mods/*/gpui-kit.d.ts
