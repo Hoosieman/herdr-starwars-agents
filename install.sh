@@ -4,7 +4,7 @@
 #   bundle/layouts/*  -> <home>/layouts/<file>   (starwars.json)
 #   bundle/themes/*   -> <home>/themes/<file>    (saber-night.json)
 # Anything already there that isn't our link is moved aside to <name>.bak-<timestamp>, never deleted.
-# Run again after a pull only if a NEW file appeared under bundle/. Safe to re-run.
+# Run it after every pull: re-linking is what makes herdr reload the changed mods. Safe to re-run.
 set -eu
 
 repo=$(cd "$(dirname "$0")" && pwd)
@@ -13,8 +13,10 @@ stamp=$(date +%Y%m%d-%H%M%S)
 
 link() { # link <source in repo> <destination in herdr home>
   src=$1 dst=$2
-  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then echo "ok      $dst"; return; fi
-  if [ -e "$dst" ] || [ -L "$dst" ]; then mv "$dst" "$dst.bak-$stamp"; echo "backup  $dst.bak-$stamp"; fi
+  # Our own link is always re-made, never skipped: herdr only hot-reloads a mod when its folder under mods/
+  # changes, and a pull changes the files inside this repo instead, so re-linking is what makes herdr reload.
+  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then rm "$dst"
+  elif [ -e "$dst" ] || [ -L "$dst" ]; then mv "$dst" "$dst.bak-$stamp"; echo "backup  $dst.bak-$stamp"; fi
   mkdir -p "$(dirname "$dst")"
   ln -s "$src" "$dst"
   echo "linked  $dst"

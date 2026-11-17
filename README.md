@@ -38,13 +38,15 @@ Then add the sprite picker key to `~/.config/herdr-app/keys.json` (Option-Shift-
 ## Update
 
 ```sh
-git -C ~/.config/herdr-app/mods/starwars-agents pull
+cd ~/.config/herdr-app/mods/starwars-agents && git pull && sh install.sh
 ```
 
-The links point into the repo, so a pull updates everything and herdr hot-reloads it. Re-run
-`install.sh` only if a pull adds a new mod, layout or theme under `bundle/`.
+Run `install.sh` after every pull, not just the first time. herdr hot-reloads a mod only when its folder
+under `mods/` changes; a pull changes the files inside this repo instead, so the script re-makes each
+link to make herdr pick the changes up.
 
 ## On Windows
 
 Same layout, linked with junctions (folders) and hard links (files) instead of symlinks, so editing
-`~/.config/herdr-app/mods/saber-agents/...` edits the repo copy directly.
+`~/.config/herdr-app/mods/saber-agents/...` edits the repo copy directly. After an edit or a pull, run
+`pwsh -File relink.ps1` (PowerShell 7) to make herdr reload.

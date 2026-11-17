@@ -554,10 +554,9 @@ export default class Agents extends View {
         // One fixed slot for the time (or the pin button while hovered), so the saber and its percentage line up
         // on every row whatever the time reads ("1m", "48m") and don't move on hover.
         .when(this.hovered === a.address, el => el.child(close))
+        // The time stays put on hover; the only hover control is the close x in the corner (no pin button).
         .child(h_flex().w(30).flex_none().justify_end().items_center()
-          // While hovered the pin drops a little, clear of the close x above it.
-          .when(this.hovered === a.address, el => el.pt(meterRow ? 16 : 0).child(pin))
-          .when(this.hovered !== a.address && Boolean(when), el => el.child(div().flex_none().whitespace_nowrap().text_size(11).text_color(waitColor).when(a.status === "blocked", d => d.font_bold()).child(duration(now - when)))));
+          .when(Boolean(when), el => el.child(div().flex_none().whitespace_nowrap().text_size(11).text_color(waitColor).when(a.status === "blocked", d => d.font_bold()).child(duration(now - when)))));
     };
 
     // Groups in list order: spaces (grouped) or priority sections. Agents of a
