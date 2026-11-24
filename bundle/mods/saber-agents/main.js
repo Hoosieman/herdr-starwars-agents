@@ -17,8 +17,6 @@ import { findSession, terminalFacts } from "./session.js";
 const POLL_MS = 15000;
 // How far back to look for the tool call a working agent is on.
 const DOING_WINDOW_MS = 30 * 60000;
-// A "Needs you" wait turns red after this long.
-const LONG_WAIT_MS = 10 * 60000;
 const HC_MS = 8000;
 const HELPER_MS = 20000;
 const HELPER = () => `${appHome()}/mods/saber-agents/herd.py`;
@@ -442,8 +440,8 @@ export default class Agents extends View {
       }
       const when = this.since(a);
       const idle = a.status === "idle" && !a.focused;
-      // How long it has waited on you: orange, red past 10 minutes.
-      const waitColor = a.status === "blocked" ? (now - when >= LONG_WAIT_MS ? t.ansi1 : t.blocked) : t.dim;
+      // The time since the last change is always the same dim gray, whatever the state.
+      const waitColor = t.dim;
       const isPinned = a.pinned;
       const pin = div()
         .id(`pin-${a.address}`)
@@ -499,9 +497,9 @@ export default class Agents extends View {
       if (pct != null) {
         const left = contextLeft(pct);
         const color = t[saberTone(left)] ?? saberTone(left);
-        // Awaiting orders: the blade is red and pulses. The percentage keeps the context colour either way.
+        // Awaiting orders: the blade is red and pulses. Hyperspace (working): the blade keeps its context colour and pulses the same way. The percentage keeps the context colour either way.
         const blocked = a.status === "blocked";
-        meterParts.push(saberBar(t, left, blocked ? t.blocked : color, lit, hiltFor(a.address), { reach: this.reach(a.address), hum: a.status === "working", pulse: blocked }));
+        meterParts.push(saberBar(t, left, blocked ? t.blocked : color, lit, hiltFor(a.address), { reach: this.reach(a.address), pulse: blocked || a.status === "working" }));
         // A fixed, right-aligned slot so every row's percentage lines up, whatever the number ("5%" to "100%").
         meterParts.push(div().w(24).flex_none().text_right().whitespace_nowrap().text_size(9).text_color(color).opacity(0.8).child(`${left}%`));
       }
@@ -539,6 +537,11 @@ export default class Agents extends View {
           cx.notify();
         })
         .on_click(() => run("pane.focus", { pane: a.pane }))
+        // Right-click: Rename / Remove, through the shared menu mod (as the tab bar's right-click does).
+        .on_mouse_down("right", (_e, cx) => {
+          cx.stop_propagation();
+          openOverlay({ mod: "menu", kind: "popup", width: 200, props: { tab: "agent", target: { tab: a.tab, pane: a.pane } } });
+        })
         .child(div().id(`agent-fold-${a.address}`)
           .when(subs.length > 0, el => el.on_click((_e, cx) => {
             cx.stop_propagation();
@@ -556,7 +559,7 @@ export default class Agents extends View {
         .when(this.hovered === a.address, el => el.child(close))
         // The time stays put on hover; the only hover control is the close x in the corner (no pin button).
         .child(h_flex().w(30).flex_none().justify_end().items_center()
-          .when(Boolean(when), el => el.child(div().flex_none().whitespace_nowrap().text_size(11).text_color(waitColor).when(a.status === "blocked", d => d.font_bold()).child(duration(now - when)))));
+          .when(Boolean(when), el => el.child(div().flex_none().whitespace_nowrap().text_size(11).text_color(waitColor).child(duration(now - when)))));
     };
 
     // Groups in list order: spaces (grouped) or priority sections. Agents of a
